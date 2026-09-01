@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Barlow, Barlow_Condensed, IBM_Plex_Mono } from 'next/font/google'
 import { THEME_SCRIPT } from '@/ui/shell/theme-script'
+import { AppShell } from '@/ui/shell/AppShell'
 import { site } from '@/shared/site.config'
 import './globals.css'
 
@@ -39,7 +40,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
       </head>
-      <body>{children}</body>
+      <body>
+        <AppShell>{children}</AppShell>
+      </body>
     </html>
   )
 }
