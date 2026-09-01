@@ -32,6 +32,14 @@ export default defineConfig({
   root: 'content',
   output: { data: '.velite', clean: true },
   collections: { posts },
+  // A dropped post failing silently is worse than a failed build: strict makes the
+  // schema a gate, not a filter — bad frontmatter must stop `velite && next build` cold.
+  // NOTE: velite@0.4.0's CLI (cli.js) always passes an explicit `strict: false` default
+  // from parseArgs, and resolveConfig does `options.strict ?? loadedConfig.strict ?? false`
+  // — since `false` is not nullish, that CLI default silently wins over this value. This
+  // config flag alone does not gate the build; every npm script that invokes `velite` MUST
+  // also pass `--strict` on the command line (see package.json).
+  strict: true,
   mdx: {
     remarkPlugins: [remarkGfm],
     rehypePlugins: [

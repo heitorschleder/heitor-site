@@ -6,11 +6,11 @@
     "node": ">=20.9.0"
   },
   "scripts": {
-    "dev": "concurrently -k -n velite,next \"velite --watch\" \"next dev\"",
-    "build": "velite && next build",
+    "dev": "concurrently -k -n velite,next \"velite --watch --strict\" \"next dev\"",
+    "build": "velite --strict && next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "velite --silent && vitest run",
+    "test": "velite --silent --strict && vitest run",
     "test:watch": "vitest"
   },
   "dependencies": {
