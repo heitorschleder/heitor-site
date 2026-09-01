@@ -112,10 +112,19 @@
 }
 
 /* A recruiter really does print the page. A closed <details> would otherwise
-   print as a headline with nothing under it, so force every role open on paper. */
+   print as a headline with nothing under it, so force every role open on paper.
+   Two rules because two engine families hide the content differently — verify
+   print output in a real browser; this is engine-dependent either way. */
 @media print {
+  /* `revert` would roll back to the UA rule that hides closed content — the very
+     rule we are overriding. An explicit value is required. */
   details > summary ~ * {
-    display: revert !important;
+    display: block !important;
+  }
+  /* Chrome 131+ hides via content-visibility on this pseudo-element rather than
+     display, so the rule above alone is not enough there. Older engines ignore it. */
+  details::details-content {
+    content-visibility: visible !important;
   }
   details > summary {
     list-style: none;

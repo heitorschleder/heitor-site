@@ -4,6 +4,18 @@ import { Briefcase, ChevronDown } from '@/ui/icons'
 import { CAREER_HEADLINE, ROLES } from './career.data'
 
 /**
+ * Splits `a **b** c` into React nodes, rendering `**…**` as `<strong>`. Emphasis
+ * is markup built by React, not raw HTML handed to the DOM, so a key-result
+ * string cannot smuggle anything beyond bold text — the injection path is
+ * unrepresentable, not merely unused.
+ */
+export function withEmphasis(text: string) {
+  return text
+    .split(/\*\*(.+?)\*\*/g)
+    .map((part, i) => (i % 2 === 1 ? <strong key={i}>{part}</strong> : part))
+}
+
+/**
  * Native <details>, not a JS accordion. Résumé content has to be reachable by
  * find-in-page, by a crawler and by Print to PDF; the platform disclosure gives
  * all three plus keyboard support, and keeps this a Server Component.
@@ -26,9 +38,14 @@ export function CareerPanel() {
               </span>
 
               <span className="min-w-0">
-                <b className="block font-display text-[19px] font-bold uppercase leading-[1.1] tracking-[0.03em] text-[var(--color-ink)]">
+                {/*
+                  h3, not a styled <b>: Panel already gives the section one <h2>,
+                  so this is the only way a screen-reader user can jump role to
+                  role by heading instead of falling back to tab order.
+                */}
+                <h3 className="m-0 block font-display text-[19px] font-bold uppercase leading-[1.1] tracking-[0.03em] text-[var(--color-ink)]">
                   {role.role}
-                </b>
+                </h3>
                 <span className="mt-[3px] block font-mono text-[10.5px] uppercase tracking-[0.07em] text-[var(--color-mute)]">
                   {role.company}
                   {role.note ? ` · ${role.note}` : ''}
@@ -73,15 +90,9 @@ export function CareerPanel() {
                       aria-hidden="true"
                       className="mt-[8px] size-[5px] shrink-0 bg-[var(--color-acc)]"
                     />
-                    {/*
-                      Safe here and only here: `result` comes from career.data.ts, is
-                      never user input, and carries at most a <b> around a figure.
-                      Do not extend this pattern to any other content in the app.
-                    */}
-                    <span
-                      className="text-[14px] leading-[1.55] text-[var(--color-ink)] [&_b]:font-semibold [&_b]:tabular-nums"
-                      dangerouslySetInnerHTML={{ __html: result }}
-                    />
+                    <span className="text-[14px] leading-[1.55] text-[var(--color-ink)] [&_strong]:font-semibold [&_strong]:tabular-nums">
+                      {withEmphasis(result)}
+                    </span>
                   </li>
                 ))}
               </ul>

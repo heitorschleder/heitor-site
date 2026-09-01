@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { CareerPanel } from './CareerPanel'
+import { CareerPanel, withEmphasis } from './CareerPanel'
 import { ROLES } from './career.data'
 
 describe('career data', () => {
@@ -53,5 +53,21 @@ describe('CareerPanel', () => {
 
     expect(groups[0].open).toBe(true)
     expect(groups[1].open).toBe(true)
+  })
+})
+
+describe('withEmphasis', () => {
+  it('renders ** markers as <strong>, leaving surrounding text intact', () => {
+    const { container } = render(<>{withEmphasis('before **99%** after')}</>)
+    expect(container.textContent).toBe('before 99% after')
+    const strong = container.querySelector('strong')
+    expect(strong).not.toBeNull()
+    expect(strong?.textContent).toBe('99%')
+  })
+
+  it('renders a string containing markup as literal text, never as injected HTML', () => {
+    const { container } = render(<>{withEmphasis('<script>alert(1)</script>')}</>)
+    expect(container.querySelector('script')).toBeNull()
+    expect(container.textContent).toBe('<script>alert(1)</script>')
   })
 })
