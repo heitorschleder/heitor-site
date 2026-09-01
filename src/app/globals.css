@@ -110,3 +110,14 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* A recruiter really does print the page. A closed <details> would otherwise
+   print as a headline with nothing under it, so force every role open on paper. */
+@media print {
+  details > summary ~ * {
+    display: revert !important;
+  }
+  details > summary {
+    list-style: none;
+  }
+}
