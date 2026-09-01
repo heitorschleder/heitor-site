@@ -45,6 +45,11 @@ describe('ThemeToggle', () => {
       throw new Error('blocked')
     }
     try {
+      // setAttribute runs before the throwing setItem, so this assertion would
+      // hold even without the try/catch in toggle() — the real regression
+      // guard here is that userEvent.click above doesn't throw at all. An
+      // uncaught error inside the click handler fails this test as an
+      // unhandled error, which is what a missing try/catch would produce.
       await user.click(button)
       expect(document.documentElement.dataset.theme).toMatch(/^(light|dark)$/)
     } finally {

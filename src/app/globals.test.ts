@@ -17,6 +17,27 @@ function bareRoot(): string {
   return css.slice(i, css.indexOf('\n}', i))
 }
 
+/**
+ * Body of a CSS rule, found by its exact selector-plus-brace marker (e.g.
+ * `:root[data-theme='dark'] {`). Assumes no nested braces inside the rule.
+ */
+function blockBody(marker: string): string {
+  const i = css.indexOf(marker)
+  expect(i, `globals.css must contain \`${marker}\``).toBeGreaterThan(-1)
+  const open = i + marker.length
+  const close = css.indexOf('}', open)
+  return css.slice(open, close)
+}
+
+/** Normalise a declaration block to its properties, ignoring whitespace and `color-scheme`. */
+function declarations(body: string): string[] {
+  return body
+    .split(';')
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0 && !line.startsWith('color-scheme'))
+    .sort()
+}
+
 describe('theme tokens', () => {
   it('declares every token in the bare :root block', () => {
     const root = bareRoot()
@@ -37,5 +58,14 @@ describe('theme tokens', () => {
   it('uses two accent values, never one hex for both themes', () => {
     expect(css).toContain('#5F9CF7')
     expect(css).toContain('#1B4CC9')
+  })
+
+  it('keeps the OS-preference dark block and the explicit dark block identical', () => {
+    // Both guard blocks must resolve the same set of tokens to the same values.
+    // If they ever diverge, OS-preference-dark silently disagrees with an
+    // explicit dark choice — nothing else in this suite would catch that.
+    const osPreference = declarations(blockBody(':root:not([data-theme=\'light\']) {'))
+    const explicit = declarations(blockBody(':root[data-theme=\'dark\'] {'))
+    expect(osPreference).toEqual(explicit)
   })
 })
