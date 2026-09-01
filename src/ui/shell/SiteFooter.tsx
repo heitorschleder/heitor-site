@@ -14,13 +14,13 @@ const LINKS = [
  */
 export function SiteFooter() {
   return (
-    <footer className="mt-4 border-t border-[var(--color-rule)] bg-[var(--color-panel)] px-3 py-5 @min-[560px]:px-4">
-      <ul className="flex flex-col gap-3 @min-[560px]:flex-row @min-[560px]:flex-wrap @min-[560px]:gap-x-6">
+    <footer className="mt-4 border-t border-[var(--color-rule)] bg-[var(--color-panel)] px-3 py-5 @min-[560px]/shell:px-4">
+      <ul className="flex flex-col gap-3 @min-[560px]/shell:flex-row @min-[560px]/shell:flex-wrap @min-[560px]/shell:gap-x-6">
         {LINKS.map(({ key, icon: Icon, href, label }) => (
           <li key={key}>
             <a
               href={href}
-              className="flex min-h-11 items-center gap-[10px] text-[14px] text-[var(--color-mute)] transition-colors hover:text-[var(--color-acc)] @min-[560px]:min-h-0"
+              className="flex min-h-11 items-center gap-[10px] text-[14px] text-[var(--color-mute)] transition-colors hover:text-[var(--color-acc)] @min-[560px]/shell:min-h-0"
             >
               <Icon className="size-4 shrink-0" aria-hidden="true" />
               <span>{label}</span>

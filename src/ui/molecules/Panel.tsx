@@ -18,7 +18,7 @@ export function Panel({
     <section
       className={cn(
         'mx-[10px] my-3 border border-[var(--color-rule)] bg-[var(--color-panel)]',
-        '@min-[560px]:mx-4 @min-[560px]:my-[14px]',
+        '@min-[560px]/shell:mx-4 @min-[560px]/shell:my-[14px]',
         className,
       )}
     >

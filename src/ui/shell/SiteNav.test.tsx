@@ -16,6 +16,11 @@ describe('SiteNav', () => {
     expect(screen.getByRole('link', { name: 'Work' })).not.toHaveAttribute('aria-current')
   })
 
+  it('marks the active route for a nested path under it', () => {
+    render(<SiteNav pathname="/blog/some-post" />)
+    expect(screen.getByRole('link', { name: 'Writing' })).toHaveAttribute('aria-current', 'page')
+  })
+
   it('links out to every social destination with an accessible name', () => {
     render(<SiteNav pathname="/" />)
     expect(screen.getByRole('link', { name: /github/i })).toHaveAttribute(
@@ -27,6 +32,10 @@ describe('SiteNav', () => {
     expect(screen.getByRole('link', { name: /rss/i })).toBeInTheDocument()
   })
 
+  // Nothing renders this text today, so this guard cannot fail from a
+  // regression yet — it exists because the site owner explicitly asked for
+  // "Open to Work" to be removed from the nav, and this pins that decision
+  // against it quietly coming back.
   it('does not advertise availability', () => {
     render(<SiteNav pathname="/" />)
     expect(screen.queryByText(/open to work/i)).not.toBeInTheDocument()

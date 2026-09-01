@@ -30,7 +30,7 @@ export function ThemeToggle() {
       type="button"
       onClick={toggle}
       aria-label="Switch theme"
-      className="flex size-11 items-center justify-center border border-[var(--color-rule)] text-[var(--color-mute)] transition-colors hover:border-[var(--color-acc)] hover:text-[var(--color-acc)] @min-[560px]:size-[30px]"
+      className="flex size-11 items-center justify-center border border-[var(--color-rule)] text-[var(--color-mute)] transition-colors hover:border-[var(--color-acc)] hover:text-[var(--color-acc)] @min-[560px]/shell:size-[30px]"
     >
       <Sun className="theme-to-light size-[15px]" aria-hidden="true" />
       <Moon className="theme-to-dark size-[15px]" aria-hidden="true" />
