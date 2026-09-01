@@ -17,8 +17,15 @@ export function RepositoryExpander({
 
   return (
     <>
-      <div id="repository-overflow" hidden={!open} className="contents">
-        {open ? children : null}
+      {/*
+        No `display: contents` (or any other author `display` rule) here.
+        `hidden` sets `display: none` via the browser's user-agent stylesheet,
+        which loses to ANY author-origin display rule regardless of
+        specificity once real CSS loads (cascade origin beats specificity).
+        An ordinary block wrapper lets `hidden` win outright.
+      */}
+      <div id="repository-overflow" hidden={!open}>
+        {children}
       </div>
       <div className="flex flex-wrap items-stretch justify-between border-t border-[var(--color-rule)]">
         <p className="flex items-center px-3 py-[10px] font-mono text-[10px] uppercase tracking-[0.09em] text-[var(--color-mute)]">
