@@ -1,26 +1,81 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
+@theme {
+  --font-display: var(--font-barlow-condensed), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-barlow), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+/* Light is the baseline. Every token is declared here before any block overrides it;
+   the neutral ground is mixed with a few percent of the accent, which is what keeps
+   the greys from reading as an unconsidered default. */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --color-acc: #1B4CC9;
+  --color-on-acc: #FFFFFF;
+  --color-bg: color-mix(in oklab, var(--color-acc) 4%, #EFF1F3);
+  --color-panel: color-mix(in oklab, var(--color-acc) 2%, #FCFCFD);
+  --color-panel-2: color-mix(in oklab, var(--color-acc) 6%, #E5E8EB);
+  --color-rule: color-mix(in oklab, var(--color-acc) 15%, #C4CACE);
+  --color-ink: #131719;
+  --color-mute: #5C6367;
+  --color-wash: color-mix(in oklab, var(--color-acc) 9%, transparent);
+  --color-glow: color-mix(in oklab, var(--color-acc) 16%, transparent);
+  color-scheme: light;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
+/* Unstamped document following a dark OS. Guarded so an explicit light choice still wins. */
 @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  :root:not([data-theme='light']) {
+    --color-acc: #5F9CF7;
+    --color-on-acc: #080C12;
+    --color-bg: color-mix(in oklab, var(--color-acc) 5%, #121415);
+    --color-panel: color-mix(in oklab, var(--color-acc) 6%, #1A1D1F);
+    --color-panel-2: color-mix(in oklab, var(--color-acc) 9%, #232729);
+    --color-rule: color-mix(in oklab, var(--color-acc) 13%, #2B3033);
+    --color-ink: #E8EAEC;
+    --color-mute: #8C9298;
+    --color-wash: color-mix(in oklab, var(--color-acc) 14%, transparent);
+    --color-glow: color-mix(in oklab, var(--color-acc) 22%, transparent);
+    color-scheme: dark;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Explicit dark choice, so the toggle wins in the other direction too. */
+:root[data-theme='dark'] {
+  --color-acc: #5F9CF7;
+  --color-on-acc: #080C12;
+  --color-bg: color-mix(in oklab, var(--color-acc) 5%, #121415);
+  --color-panel: color-mix(in oklab, var(--color-acc) 6%, #1A1D1F);
+  --color-panel-2: color-mix(in oklab, var(--color-acc) 9%, #232729);
+  --color-rule: color-mix(in oklab, var(--color-acc) 13%, #2B3033);
+  --color-ink: #E8EAEC;
+  --color-mute: #8C9298;
+  --color-wash: color-mix(in oklab, var(--color-acc) 14%, transparent);
+  --color-glow: color-mix(in oklab, var(--color-acc) 22%, transparent);
+  color-scheme: dark;
+}
+
+@layer base {
+  body {
+    background: var(--color-bg);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  :where(a, button, summary):focus-visible {
+    outline: 2px solid var(--color-acc);
+    outline-offset: 2px;
+  }
+  ::selection {
+    background: var(--color-wash);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
