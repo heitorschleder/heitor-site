@@ -11,8 +11,8 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@': resolve(__dirname, './src'),
-      '#content': resolve(__dirname, './.velite'),
+      '@': resolve(import.meta.dirname, './src'),
+      '#content': resolve(import.meta.dirname, './.velite'),
     },
   },
 })
