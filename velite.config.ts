@@ -37,8 +37,10 @@ export default defineConfig({
   // NOTE: velite@0.4.0's CLI (cli.js) always passes an explicit `strict: false` default
   // from parseArgs, and resolveConfig does `options.strict ?? loadedConfig.strict ?? false`
   // — since `false` is not nullish, that CLI default silently wins over this value. This
-  // config flag alone does not gate the build; every npm script that invokes `velite` MUST
-  // also pass `--strict` on the command line (see package.json).
+  // config flag alone does not gate the build; the CLI also needs `--strict` on its command
+  // line. `npm run velite` (package.json) is the single canonical invocation that carries
+  // that flag — `dev`, `build` and `test` all call through it rather than invoking the
+  // `velite` CLI directly, so this gotcha only has to be handled in one place.
   strict: true,
   mdx: {
     remarkPlugins: [remarkGfm],
