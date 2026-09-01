@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
-import { loadRepositories, GITHUB_QUERY } from './github'
+import { loadRepositories, languageCounts, GITHUB_QUERY } from './github'
+import type { Repository } from './repos.types'
 
 function fakeFetch(payload: unknown) {
   return vi.fn(async () => new Response(JSON.stringify(payload), { status: 200 }))
@@ -98,5 +99,52 @@ describe('loadRepositories', () => {
     await expect(
       loadRepositories(errored as unknown as typeof fetch),
     ).rejects.toThrow(/Bad credentials/)
+  })
+})
+
+function repo(language: string, name = language): Repository {
+  return {
+    name,
+    description: 'Description.',
+    language,
+    year: '2025',
+    url: `https://github.com/heitorschleder/${name}`,
+    pinned: false,
+  }
+}
+
+describe('languageCounts', () => {
+  it('buckets counts correctly across several repositories', () => {
+    const repos = [
+      repo('TypeScript', 'ts-1'),
+      repo('TypeScript', 'ts-2'),
+      repo('TypeScript', 'ts-3'),
+      repo('Vue', 'vue-1'),
+      repo('Vue', 'vue-2'),
+      repo('Other', 'other-1'),
+    ]
+    expect(languageCounts(repos)).toEqual([
+      { label: 'TypeScript', count: 3 },
+      { label: 'Vue', count: 2 },
+      { label: 'Other', count: 1 },
+    ])
+  })
+
+  it('counts a repository whose language is "Other" like any other language', () => {
+    const repos = [repo('Other', 'a'), repo('Other', 'b'), repo('Rust', 'c')]
+    expect(languageCounts(repos)).toContainEqual({ label: 'Other', count: 2 })
+  })
+
+  it('breaks a tie in count alphabetically by label, regardless of input order', () => {
+    const repos = [
+      repo('Zebra', 'z-1'),
+      repo('Zebra', 'z-2'),
+      repo('Apple', 'a-1'),
+      repo('Apple', 'a-2'),
+    ]
+    expect(languageCounts(repos)).toEqual([
+      { label: 'Apple', count: 2 },
+      { label: 'Zebra', count: 2 },
+    ])
   })
 })
