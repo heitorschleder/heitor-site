@@ -69,7 +69,24 @@
   ::selection {
     background: var(--color-wash);
   }
+
+  /* Which toggle icon shows is a function of the resolved theme, not of React
+     state, so it is right on the first paint. Sun means "switch to light". */
+  .theme-to-light { display: none; }
+  .theme-to-dark { display: block; }
 }
+
+/* Unstamped, dark OS: same guard as the colour tokens so an explicit light
+   choice still wins. Unlayered, so it beats the @layer base default above
+   regardless of source order. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .theme-to-light { display: block; }
+  :root:not([data-theme='light']) .theme-to-dark { display: none; }
+}
+
+/* Explicit dark choice. */
+:root[data-theme='dark'] .theme-to-light { display: block; }
+:root[data-theme='dark'] .theme-to-dark { display: none; }
 
 @media (prefers-reduced-motion: reduce) {
   *,

@@ -51,4 +51,15 @@ describe('ThemeToggle', () => {
       Storage.prototype.setItem = original
     }
   })
+
+  it('renders both icons on first paint, hidden from the accessibility tree', () => {
+    // CSS, not React state, decides which icon shows — otherwise the toggle
+    // would render the wrong icon until hydration completes.
+    const { container } = render(<ThemeToggle />)
+    const icons = container.querySelectorAll('svg')
+    expect(icons).toHaveLength(2)
+    for (const icon of icons) {
+      expect(icon).toHaveAttribute('aria-hidden', 'true')
+    }
+  })
 })
