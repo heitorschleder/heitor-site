@@ -17,7 +17,7 @@ export default async function HomePage() {
 
   return (
     <>
-      <Hero />
+      <Hero repoCount={repos.length} />
       <CareerPanel />
       <RepositoryGrid repos={repos} initial={10} />
       <TechnologyMatrix />
