@@ -4,3 +4,5 @@ node_modules/
 !.env.example
 .DS_Store
 .velite/
+next-env.d.ts
+*.tsbuildinfo
