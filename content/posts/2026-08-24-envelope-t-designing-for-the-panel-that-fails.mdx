@@ -1,0 +1,58 @@
+---
+title: 'Envelope<T>: designing for the panel that fails'
+date: 2026-08-24
+summary: Six panels, six upstream services, one rule — a panel whose source is down explains itself and never takes the page with it.
+tags:
+  - Architecture
+  - TypeScript
+---
+
+The console pulls from six places — GitHub, Spotify, a weather service, and three of my own
+endpoints. On any given morning at least one of them is slow, rate-limited, or returning something I
+did not plan for. The first version handled this the way most dashboards do: a `try/catch` per
+loader and a shrug.
+
+That shrug is the problem. A caught error with nothing downstream forced to look at it becomes a
+blank rectangle, and a blank rectangle looks identical to a panel with no data. The reader cannot
+tell whether GitHub is down or whether I simply have not committed anything this week.
+
+## Make the failure part of the type
+
+So the loaders stopped returning `T`. They return an envelope, and the envelope is a discriminated
+union:
+
+```ts
+export type Envelope<T> =
+  | { ok: true; data: T; fetchedAt: string }
+  | { ok: false; reason: FailureReason; fetchedAt: string }
+
+export type FailureReason =
+  | 'timeout'
+  | 'rate-limited'
+  | 'unauthorized'
+  | 'upstream-error'
+  | 'not-configured'
+```
+
+Nothing here is clever. What it buys is that the compiler will not let a panel render without
+deciding what a failure looks like. You cannot reach `envelope.data` until you have narrowed `ok`,
+and the moment you narrow it you are staring at the other branch.
+
+## Five reasons, not one boolean
+
+The temptation is a single `error: string`. I have written that before and it always turns into a
+stack trace leaking onto the page. Five named reasons force a decision per case, and each one earns
+different copy:
+
+- **rate-limited** — the data was real an hour ago, so show it with an honest timestamp rather than
+  an error.
+- **not-configured** — this is my fault at deploy time, not an outage. It should look different.
+- **unauthorized** — the token expired. This is the one that should page me.
+
+Each panel is an independent async Server Component behind its own `<Suspense>` boundary, so a slow
+source delays its own rectangle and nothing else. The page never waits on its worst upstream.
+
+## What it cost
+
+About forty lines of types and one afternoon of rewriting loaders. In exchange, every failure mode
+on the page is now enumerable, and I have not shipped a blank panel since.

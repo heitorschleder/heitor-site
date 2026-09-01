@@ -1,7 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Nothing under content/ may become a route by accident.
+  pageExtensions: ['ts', 'tsx'],
 };
 
 export default nextConfig;
