@@ -2,6 +2,8 @@ import { posts as allPosts } from '#content'
 import type { PostSummary } from './PostList'
 
 export { PostList, formatDate, type PostSummary } from './PostList'
+export { PostArticle, type ArticleHead } from './PostArticle'
+export { MDXContent } from './MDXContent'
 
 /** Published posts, newest first. Drafts never reach a production build. */
 export function sortedPosts(): PostSummary[] {

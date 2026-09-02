@@ -130,3 +130,95 @@
     list-style: none;
   }
 }
+
+@layer components {
+  .prose-console p {
+    margin: 0 0 17px;
+    font-size: 15.5px;
+    line-height: 1.74;
+    color: var(--color-ink);
+  }
+  .prose-console h2 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 30px 0 12px;
+    font-family: var(--font-display);
+    font-size: 19px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-ink);
+  }
+  .prose-console h2::before {
+    content: '';
+    flex: none;
+    width: 16px;
+    height: 2px;
+    background: var(--color-acc);
+  }
+  .prose-console ul {
+    margin: 0 0 17px;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .prose-console li {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 10px;
+    font-size: 15px;
+    line-height: 1.62;
+    color: var(--color-ink);
+  }
+  .prose-console li::before {
+    content: '';
+    width: 5px;
+    height: 5px;
+    margin-top: 9px;
+    background: var(--color-acc);
+  }
+  .prose-console strong {
+    font-weight: 600;
+  }
+  .prose-console :not(pre) > code {
+    font-family: var(--font-mono);
+    font-size: 0.88em;
+    padding: 1px 5px;
+    background: var(--color-panel-2);
+  }
+  .prose-console pre {
+    margin: 0 0 17px;
+    padding: 13px 15px;
+    overflow-x: auto;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    line-height: 1.72;
+    background: var(--color-panel);
+    border: 1px solid var(--color-rule);
+  }
+
+  /* rehype-pretty-code (keepBackground: false) emits each token as a bare span
+     carrying both --shiki-light and --shiki-dark as inline custom properties,
+     with no color of its own. This baseline picks the light value; the two
+     blocks below switch it, using the identical three-state guard the color
+     tokens use further up this file. */
+  .prose-console pre code[data-theme] span {
+    color: var(--shiki-light);
+  }
+}
+
+/* Unstamped document following a dark OS. Same guard as the color tokens above,
+   applied to Shiki's per-token custom properties instead of the theme aliases. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .prose-console pre code[data-theme] span {
+    color: var(--shiki-dark);
+  }
+}
+
+/* Explicit dark choice, so the toggle wins in the other direction too. */
+:root[data-theme='dark'] .prose-console pre code[data-theme] span {
+  color: var(--shiki-dark);
+}
