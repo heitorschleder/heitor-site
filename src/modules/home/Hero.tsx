@@ -5,7 +5,7 @@ export function Hero({ repoCount }: { repoCount: number }) {
   const FACTS = [
     { icon: MapPin, text: site.location },
     { icon: GraduationCap, text: 'BSc Data Science' },
-    { icon: GitBranch, text: `${repoCount} public repositories` },
+    { icon: GitBranch, text: `${repoCount} public ${repoCount === 1 ? 'repository' : 'repositories'}` },
   ]
 
   return (

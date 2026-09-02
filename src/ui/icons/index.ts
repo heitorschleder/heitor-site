@@ -13,6 +13,7 @@ export {
   Rss,
   ScanLine,
   Sun,
+  type LucideIcon,
 } from 'lucide-react'
 
 export { BrandGithub } from './BrandGithub'

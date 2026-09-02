@@ -29,12 +29,12 @@ function blockBody(marker: string): string {
   return css.slice(open, close)
 }
 
-/** Normalise a declaration block to its properties, ignoring whitespace and `color-scheme`. */
+/** Normalise a declaration block to its properties, ignoring whitespace. */
 function declarations(body: string): string[] {
   return body
     .split(';')
     .map((line) => line.trim())
-    .filter((line) => line.length > 0 && !line.startsWith('color-scheme'))
+    .filter((line) => line.length > 0)
     .sort()
 }
 

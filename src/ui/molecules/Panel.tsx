@@ -1,4 +1,4 @@
-import type { LucideIcon } from 'lucide-react'
+import type { LucideIcon } from '@/ui/icons'
 import { cn } from '@/shared/cn'
 
 export function Panel({
