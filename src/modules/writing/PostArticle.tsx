@@ -1,10 +1,6 @@
-export type ArticleHead = {
-  title: string
-  date: string
-  summary: string
-  tags: string[]
-  readingTime: number
-}
+import type { PostSummary } from './PostList'
+
+export type ArticleHead = Pick<PostSummary, 'title' | 'date' | 'summary' | 'tags' | 'readingTime'>
 
 export function PostArticle({
   post,
