@@ -18,11 +18,6 @@ describe('buildRssXml', () => {
     expect(xml).not.toContain('<link>/blog/')
   })
 
-  it('escapes characters that would break the document', () => {
-    // "Envelope<T>" would otherwise open a phantom tag.
-    expect(xml).not.toMatch(/<title>[^<]*Envelope<T>/)
-    expect(xml).toContain('Envelope&lt;T&gt;')
-  })
 
   it('emits valid RFC 822 pubDate for each post, not "Invalid Date"', () => {
     // Extract all pubDate values from the XML
@@ -40,6 +35,45 @@ describe('buildRssXml', () => {
       // RFC 822 should contain day of week, abbreviated month, and year
       expect(pubDate).toMatch(/^\w{3},\s+\d{1,2}\s+\w{3}\s+\d{4}/)
     })
+  })
+})
+
+describe('buildRssXml escaping', () => {
+  // Escaping is a property of the builder, not of whatever titles happen to
+  // exist. This used to assert against a real post called "Envelope<T>"; when
+  // that post was removed the test went green while proving nothing. A hostile
+  // fixture cannot rot that way.
+  const hostile = [
+    {
+      slug: 'hostile',
+      permalink: '/blog/hostile',
+      title: 'Envelope<T> & "friends" > everything',
+      date: '2026-08-24T00:00:00.000Z',
+      summary: 'A summary with <script>alert(1)</script> & an ampersand.',
+      tags: ['Security'],
+    },
+  ]
+
+  const xml = buildRssXml(hostile)
+
+  it('escapes angle brackets so a title cannot open a tag', () => {
+    expect(xml).toContain('Envelope&lt;T&gt;')
+    expect(xml).not.toContain('Envelope<T>')
+  })
+
+  it('escapes an ampersand once, not twice', () => {
+    expect(xml).toMatch(/&amp;\s+&quot;friends&quot;/)
+    expect(xml).not.toContain('&amp;amp;')
+  })
+
+  it('escapes a script tag in the summary into inert text', () => {
+    expect(xml).toContain('&lt;script&gt;alert(1)&lt;/script&gt;')
+    expect(xml).not.toContain('<script>')
+  })
+
+  it('leaves the document parseable — no stray < outside a real tag', () => {
+    const withoutTags = xml.replace(/<[^>]*>/g, '')
+    expect(withoutTags).not.toContain('<')
   })
 })
 
