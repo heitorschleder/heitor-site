@@ -5,6 +5,7 @@ export type PostSummary = {
   slug: string
   permalink: string
   title: string
+  /** Full ISO 8601 instant from Velite (e.g., '2026-08-24T00:00:00.000Z'), not a bare date */
   date: string
   summary: string
   tags: string[]
