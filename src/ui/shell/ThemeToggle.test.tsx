@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { ThemeToggle } from './ThemeToggle'
+import { THEME_STORAGE_KEY } from './theme-script'
 
 describe('ThemeToggle', () => {
   beforeEach(() => {
@@ -32,7 +33,7 @@ describe('ThemeToggle', () => {
     const second = document.documentElement.dataset.theme
 
     expect(second).not.toBe(first)
-    expect(localStorage.getItem('theme')).toBe(second)
+    expect(localStorage.getItem(THEME_STORAGE_KEY)).toBe(second)
   })
 
   it('survives a storage write that throws', async () => {

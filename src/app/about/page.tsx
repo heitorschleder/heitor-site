@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { TechnologyMatrix, EducationPanel } from '@/modules/profile'
 import { site } from '@/shared/site.config'
+import { PageHeader } from '@/ui/molecules/PageHeader'
 
 export const metadata: Metadata = {
   title: 'About',
@@ -10,10 +11,7 @@ export const metadata: Metadata = {
 export default function AboutPage() {
   return (
     <>
-      <div className="border-b border-[var(--color-rule)] px-[14px] pb-4 pt-5 @min-[560px]/shell:px-4 @min-[560px]/shell:pt-6">
-        <h1 className="mb-3 font-display text-[clamp(26px,4.6vw,42px)] font-bold uppercase leading-[0.98] tracking-[0.01em] text-[var(--color-ink)]">
-          About
-        </h1>
+      <PageHeader title="About">
         <div className="flex max-w-[62ch] flex-col gap-4 text-[15.5px] leading-[1.7] text-[var(--color-mute)]">
           <p>
             I am a full stack developer in {site.location}. For the last year I have been building a
@@ -33,7 +31,7 @@ export default function AboutPage() {
             one that impresses in a demo.
           </p>
         </div>
-      </div>
+      </PageHeader>
       <TechnologyMatrix />
       <EducationPanel />
     </>

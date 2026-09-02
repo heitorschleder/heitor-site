@@ -41,19 +41,11 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
   ]),
   {
+    // Base for the entire src/ tree, src/app/** included: module internals,
+    // lucide-react and any upward `../` escape are forbidden everywhere, so
+    // the layer that legitimately imports from every module — src/app — is
+    // covered too, not just modules/, ui/ and shared/ below.
     files: ["src/**/*.{ts,tsx}"],
-    rules: {
-      "no-restricted-imports": ["error", {
-        patterns: [forbidModuleInternals, forbidLucideDirect],
-      }],
-    },
-  },
-  {
-    // Every cross-directory import inside modules/, ui/ and shared/ must go
-    // through its @/ alias, so the rules above can actually see it — a
-    // relative `../` escape is invisible to a rule that only matches
-    // `@/modules/*` specifiers.
-    files: ["src/modules/**/*.{ts,tsx}"],
     rules: {
       "no-restricted-imports": ["error", {
         patterns: [forbidModuleInternals, forbidLucideDirect, forbidUpwardRelative],

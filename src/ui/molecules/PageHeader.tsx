@@ -1,0 +1,19 @@
+/**
+ * The top-of-page header shared by /work and /about: a bordered wrapper with
+ * a single display-scale `<h1>`. `/about` hangs its prose column under the
+ * heading via `children`; `/work` renders no children at all.
+ *
+ * `PostArticle`'s header is intentionally not built on this — it carries a
+ * monospaced meta line and a lede paragraph, which is a different component,
+ * not a variant of this one.
+ */
+export function PageHeader({ title, children }: { title: string; children?: React.ReactNode }) {
+  return (
+    <div className="border-b border-[var(--color-rule)] px-[14px] pb-4 pt-5 @min-[560px]/shell:px-4 @min-[560px]/shell:pt-6">
+      <h1 className="mb-3 font-display text-[clamp(26px,4.6vw,42px)] font-bold uppercase leading-[0.98] tracking-[0.01em] text-[var(--color-ink)]">
+        {title}
+      </h1>
+      {children}
+    </div>
+  )
+}

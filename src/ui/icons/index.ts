@@ -11,7 +11,6 @@ export {
   MapPin,
   Moon,
   Rss,
-  ScanLine,
   Sun,
   type LucideIcon,
 } from 'lucide-react'

@@ -1,6 +1,5 @@
 import { cn } from '@/shared/cn'
-
-export type FilterItem = { label: string; count: number; active?: boolean }
+import type { FilterItem } from '@/shared/counts'
 
 /**
  * Static in v1: it reports the shape of the collection rather than filtering it.

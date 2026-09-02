@@ -1,6 +1,7 @@
 'use client'
 
 import { Moon, Sun } from '@/ui/icons'
+import { THEME_STORAGE_KEY } from './theme-script'
 
 type Theme = 'light' | 'dark'
 
@@ -19,7 +20,7 @@ export function ThemeToggle() {
     const next: Theme = currentTheme() === 'dark' ? 'light' : 'dark'
     document.documentElement.setAttribute('data-theme', next)
     try {
-      localStorage.setItem('theme', next)
+      localStorage.setItem(THEME_STORAGE_KEY, next)
     } catch {
       // Private mode or blocked site data. The choice still applies for this page.
     }

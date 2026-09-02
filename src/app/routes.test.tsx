@@ -4,6 +4,7 @@ import { axe } from 'jest-axe'
 import { CareerPanel } from '@/modules/career'
 import { TechnologyMatrix, EducationPanel } from '@/modules/profile'
 import { Panel } from '@/ui/molecules/Panel'
+import { PageHeader } from '@/ui/molecules/PageHeader'
 import { BookOpen } from '@/ui/icons'
 
 describe('about page building blocks', () => {
@@ -34,20 +35,21 @@ describe('about page building blocks', () => {
 })
 
 describe('page heading structure', () => {
-  it('work page composes exactly one level-1 heading named "Work"', () => {
+  it('PageHeader (used by /work and /about) composes exactly one level-1 heading and renders children beneath it', () => {
     render(
       <>
-        <div className="border-b border-[var(--color-rule)] px-[14px] pb-4 pt-5 @min-[560px]/shell:px-4 @min-[560px]/shell:pt-6">
-          <h1 className="mb-3 font-display text-[clamp(26px,4.6vw,42px)] font-bold uppercase leading-[0.98] tracking-[0.01em] text-[var(--color-ink)]">
-            Work
-          </h1>
-        </div>
+        <PageHeader title="Work">
+          <p>prose column</p>
+        </PageHeader>
         <CareerPanel />
       </>,
     )
     const h1Elements = screen.getAllByRole('heading', { level: 1 })
     expect(h1Elements).toHaveLength(1)
     expect(h1Elements[0]).toHaveTextContent('Work')
+    const children = screen.getByText('prose column')
+    expect(children).toBeInTheDocument()
+    expect(h1Elements[0].compareDocumentPosition(children) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
   })
 
   it('blog page composes exactly one level-1 heading named "Writing"', () => {

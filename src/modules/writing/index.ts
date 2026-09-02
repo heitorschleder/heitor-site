@@ -1,4 +1,5 @@
 import { posts as allPosts } from '#content'
+import { countBy, type FilterItem } from '@/shared/counts'
 import type { PostSummary } from './PostList'
 
 export { PostList, formatDate, type PostSummary } from './PostList'
@@ -38,12 +39,6 @@ export function findPublishedPost<T extends { slug: string; draft: boolean }>(
   return posts.find((post) => post.slug === slug && !post.draft)
 }
 
-export function tagCounts(posts: PostSummary[]): { label: string; count: number }[] {
-  const counts = new Map<string, number>()
-  for (const post of posts) {
-    for (const tag of post.tags) counts.set(tag, (counts.get(tag) ?? 0) + 1)
-  }
-  return [...counts.entries()]
-    .map(([label, count]) => ({ label, count }))
-    .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label))
+export function tagCounts(posts: PostSummary[]): FilterItem[] {
+  return countBy(posts, (post) => post.tags)
 }

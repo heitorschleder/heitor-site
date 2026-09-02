@@ -1,5 +1,6 @@
 import { REPO_OVERRIDES } from '@content/repos.overrides'
 import { GITHUB_LOGIN } from '@/shared/site.config'
+import { countBy, type FilterItem } from '@/shared/counts'
 import type { LoadResult, Repository } from './repos.types'
 
 export const GITHUB_QUERY = `
@@ -85,10 +86,6 @@ export async function loadRepositories(fetchImpl: typeof fetch = fetch): Promise
 }
 
 /** Language name -> count, for the filter strip. */
-export function languageCounts(repos: Repository[]): { label: string; count: number }[] {
-  const counts = new Map<string, number>()
-  for (const repo of repos) counts.set(repo.language, (counts.get(repo.language) ?? 0) + 1)
-  return [...counts.entries()]
-    .map(([label, count]) => ({ label, count }))
-    .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label))
+export function languageCounts(repos: Repository[]): FilterItem[] {
+  return countBy(repos, (repo) => [repo.language])
 }
