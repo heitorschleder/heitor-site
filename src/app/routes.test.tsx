@@ -3,6 +3,8 @@ import { render, screen } from '@testing-library/react'
 import { axe } from 'jest-axe'
 import { CareerPanel } from '@/modules/career'
 import { TechnologyMatrix, EducationPanel } from '@/modules/profile'
+import { Panel } from '@/ui/molecules/Panel'
+import { BookOpen } from '@/ui/icons'
 
 describe('about page building blocks', () => {
   it('renders career, technologies and education without accessibility violations', async () => {
@@ -28,5 +30,34 @@ describe('about page building blocks', () => {
       'Frontend Developer Jr',
       'Intern',
     ])
+  })
+})
+
+describe('page heading structure', () => {
+  it('work page composes exactly one level-1 heading named "Work"', () => {
+    render(
+      <>
+        <div className="border-b border-[var(--color-rule)] px-[14px] pb-4 pt-5 @min-[560px]/shell:px-4 @min-[560px]/shell:pt-6">
+          <h1 className="mb-3 font-display text-[clamp(26px,4.6vw,42px)] font-bold uppercase leading-[0.98] tracking-[0.01em] text-[var(--color-ink)]">
+            Work
+          </h1>
+        </div>
+        <CareerPanel />
+      </>,
+    )
+    const h1Elements = screen.getAllByRole('heading', { level: 1 })
+    expect(h1Elements).toHaveLength(1)
+    expect(h1Elements[0]).toHaveTextContent('Work')
+  })
+
+  it('blog page composes exactly one level-1 heading named "Writing"', () => {
+    render(
+      <Panel title="Writing" icon={BookOpen} headingLevel={1}>
+        <p>content</p>
+      </Panel>,
+    )
+    const h1Elements = screen.getAllByRole('heading', { level: 1 })
+    expect(h1Elements).toHaveLength(1)
+    expect(h1Elements[0]).toHaveTextContent('Writing')
   })
 })

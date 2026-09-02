@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 export default function BlogPage() {
   const posts = sortedPosts()
   return (
-    <Panel title="Writing" icon={BookOpen} meta={`${posts.length} entries · English`}>
+    <Panel title="Writing" icon={BookOpen} meta={`${posts.length} entries · English`} headingLevel={1}>
       <FilterStrip items={[{ label: 'All', count: posts.length, active: true }, ...tagCounts(posts)]} />
       <PostList posts={posts} />
     </Panel>

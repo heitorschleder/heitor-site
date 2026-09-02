@@ -14,6 +14,24 @@ describe('Panel', () => {
     expect(screen.getByRole('heading', { name: 'Technologies' })).toBeInTheDocument()
   })
 
+  it('renders its title at level 2 by default', () => {
+    render(
+      <Panel title="Technologies" icon={Cpu}>
+        <p>body</p>
+      </Panel>,
+    )
+    expect(screen.getByRole('heading', { name: 'Technologies', level: 2 })).toBeInTheDocument()
+  })
+
+  it('renders its title at level 1 when headingLevel prop is set to 1', () => {
+    render(
+      <Panel title="Writing" icon={Cpu} headingLevel={1}>
+        <p>body</p>
+      </Panel>,
+    )
+    expect(screen.getByRole('heading', { name: 'Writing', level: 1 })).toBeInTheDocument()
+  })
+
   it('renders optional meta text', () => {
     render(
       <Panel title="Career" icon={Cpu} meta="4 roles">

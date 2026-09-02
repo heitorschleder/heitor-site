@@ -4,7 +4,7 @@ import { site } from '@/shared/site.config'
 
 export const metadata: Metadata = {
   title: 'About',
-  description: site.description,
+  description: 'Intern-turned-tech-lead with Data Science degree. Full stack developer across React, Flutter, Java, cloud infrastructure, and AI.',
 }
 
 export default function AboutPage() {
