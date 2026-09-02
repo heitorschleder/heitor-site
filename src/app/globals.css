@@ -111,6 +111,34 @@
   }
 }
 
+/* Smooth open/close for the career disclosures.
+   `::details-content` is the box the browser hides on a closed <details>, so it
+   is the only thing that can be transitioned — animating a wrapper div would
+   fight the UA rule instead of riding it. Two pieces make it work:
+   `interpolate-size: allow-keywords` lets `auto` participate in a transition at
+   all, and `transition-behavior: allow-discrete` carries `content-visibility`
+   across its discrete jump so the content is not clipped mid-animation.
+   `interpolate-size` sits on `details` rather than `:root` because it is
+   inherited, and nothing else on this site transitions to a keyword size.
+   Engines without `::details-content` simply snap open, as they do today. The
+   global prefers-reduced-motion block above already collapses these durations. */
+details {
+  interpolate-size: allow-keywords;
+}
+
+details::details-content {
+  block-size: 0;
+  overflow: hidden;
+  transition:
+    block-size 240ms ease,
+    content-visibility 240ms;
+  transition-behavior: allow-discrete;
+}
+
+details[open]::details-content {
+  block-size: auto;
+}
+
 /* A recruiter really does print the page. A closed <details> would otherwise
    print as a headline with nothing under it, so force every role open on paper.
    Two rules because two engine families hide the content differently — verify
@@ -122,9 +150,14 @@
     display: block !important;
   }
   /* Chrome 131+ hides via content-visibility on this pseudo-element rather than
-     display, so the rule above alone is not enough there. Older engines ignore it. */
+     display, so the rule above alone is not enough there. Older engines ignore it.
+     `block-size` and `overflow` are reset too: the open/close animation above
+     collapses this box to zero height when closed, and on paper that would clip
+     the content just as surely as the display rule this block exists to defeat. */
   details::details-content {
     content-visibility: visible !important;
+    block-size: auto !important;
+    overflow: visible !important;
   }
   details > summary {
     list-style: none;
