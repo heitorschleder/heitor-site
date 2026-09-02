@@ -16,7 +16,7 @@ export function buildRssXml(posts: PostSummary[]): string {
       <title>${escapeXml(post.title)}</title>
       <link>${site.url}${post.permalink}</link>
       <guid isPermaLink="true">${site.url}${post.permalink}</guid>
-      <pubDate>${new Date(`${post.date}T00:00:00Z`).toUTCString()}</pubDate>
+      <pubDate>${new Date(post.date).toUTCString()}</pubDate>
       <description>${escapeXml(post.summary)}</description>
     </item>`,
     )

@@ -9,7 +9,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   }))
   const posts = sortedPosts().map((post) => ({
     url: `${site.url}${post.permalink}`,
-    lastModified: new Date(`${post.date}T00:00:00Z`),
+    lastModified: new Date(post.date),
   }))
   return [...routes, ...posts]
 }

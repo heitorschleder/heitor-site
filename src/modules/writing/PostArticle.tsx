@@ -13,7 +13,7 @@ export function PostArticle({
   post: ArticleHead
   children: React.ReactNode
 }) {
-  const printed = new Date(`${post.date}T00:00:00Z`).toLocaleDateString('en-GB', {
+  const printed = new Date(post.date).toLocaleDateString('en-GB', {
     day: 'numeric',
     month: 'long',
     year: 'numeric',
