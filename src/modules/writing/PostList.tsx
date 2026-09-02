@@ -44,7 +44,7 @@ export function PostList({
         <li
           key={post.slug}
           hidden={isHidden?.(post)}
-          className="grid grid-cols-1 gap-[6px] border-b border-[var(--color-rule)] px-3 py-[13px] last:border-b-0 @min-[520px]/shell:grid-cols-[86px_minmax(0,1fr)] @min-[520px]/shell:gap-[14px]"
+          className="relative grid grid-cols-1 gap-[6px] border-b border-[var(--color-rule)] px-3 py-[13px] transition-colors last:border-b-0 hover:bg-[var(--color-panel-2)] @min-[520px]/shell:grid-cols-[86px_minmax(0,1fr)] @min-[520px]/shell:gap-[14px]"
         >
           <time
             dateTime={post.date}
@@ -54,7 +54,18 @@ export function PostList({
           </time>
           <div>
             <h3 className="mb-[5px] font-display text-[20px] font-semibold uppercase leading-[1.14] tracking-[0.01em]">
-              <Link href={post.permalink} className="text-[var(--color-ink)] hover:text-[var(--color-acc)]">
+              {/*
+                The whole row is the click target, via an ::after that covers the
+                positioned <li> — not by wrapping the row in the link. Wrapping
+                would make the link's accessible name the entire block, so a
+                screen reader would read out the date, summary and every tag as
+                the link's text. This way the name stays the title, keyboard
+                focus lands on the title, and a pointer can click anywhere.
+              */}
+              <Link
+                href={post.permalink}
+                className="text-[var(--color-ink)] after:absolute after:inset-0 after:content-[''] hover:text-[var(--color-acc)]"
+              >
                 {post.title}
               </Link>
             </h3>
