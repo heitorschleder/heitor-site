@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { posts } from '#content'
-import { PostArticle, MDXContent } from '@/modules/writing'
+import { PostArticle, MDXContent, findPublishedPost } from '@/modules/writing'
 
 type Params = { params: Promise<{ slug: string }> }
 
@@ -11,7 +11,7 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { slug } = await params
-  const post = posts.find((p) => p.slug === slug)
+  const post = findPublishedPost(posts, slug)
   if (!post) return {}
   return {
     title: post.title,
@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 
 export default async function PostPage({ params }: Params) {
   const { slug } = await params
-  const post = posts.find((p) => p.slug === slug && !p.draft)
+  const post = findPublishedPost(posts, slug)
   if (!post) notFound()
 
   return (

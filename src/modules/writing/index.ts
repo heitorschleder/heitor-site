@@ -21,6 +21,23 @@ export function sortedPosts(): PostSummary[] {
     }))
 }
 
+/**
+ * The single "this slug, and not a draft" lookup. `generateMetadata` and the
+ * page body in `src/app/blog/[slug]/page.tsx` both need exactly this check —
+ * sharing one function is what keeps them from drifting apart: a bare
+ * `.find` without the draft guard once let a draft's title leak into
+ * `<head>` metadata before the page body's `notFound()` ever ran.
+ *
+ * Takes the collection as a parameter (rather than reading `#content`
+ * itself) so it stays a plain, testable function with no module to mock.
+ */
+export function findPublishedPost<T extends { slug: string; draft: boolean }>(
+  posts: T[],
+  slug: string,
+): T | undefined {
+  return posts.find((post) => post.slug === slug && !post.draft)
+}
+
 export function tagCounts(posts: PostSummary[]): { label: string; count: number }[] {
   const counts = new Map<string, number>()
   for (const post of posts) {

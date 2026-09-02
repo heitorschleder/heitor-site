@@ -29,7 +29,12 @@ describe('PostArticle', () => {
       </PostArticle>,
     )
     expect(screen.getByText('the body text')).toBeInTheDocument()
-    expect(container.querySelector('.prose-console')).not.toBeNull()
+    const column = container.querySelector('.prose-console')
+    expect(column).not.toBeNull()
+    // jsdom cannot compute layout, so this is the pragmatic ceiling: assert the
+    // classes that bound and centre the column are actually present, not just
+    // that some element carries the marker class.
+    expect(column).toHaveClass('max-w-[64ch]', 'mx-auto')
   })
 
   it('exposes the date as a machine-readable time', () => {
