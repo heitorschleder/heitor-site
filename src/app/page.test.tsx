@@ -17,6 +17,11 @@ describe('Hero', () => {
     expect(screen.getByText(/17 public repositories/i)).toBeInTheDocument()
   })
 
+  it('singularizes the repository count when there is exactly one', () => {
+    render(<Hero repoCount={1} />)
+    expect(screen.getByText(/1 public repository\b/i)).toBeInTheDocument()
+  })
+
   it('has no accessibility violations', async () => {
     const { container } = render(<Hero repoCount={17} />)
     expect(await axe(container)).toHaveNoViolations()

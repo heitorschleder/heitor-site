@@ -2,6 +2,33 @@ import { defineConfig, globalIgnores } from "eslint/config";
 import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
 
+// Shared pattern fragments. ESLint flat config does not merge a rule's options
+// across matching config objects — the last matching object for a given rule
+// wins outright — so every block below that touches `no-restricted-imports`
+// spells out the full set of patterns it needs rather than relying on an
+// earlier block's patterns still applying.
+const forbidModuleInternals = {
+  group: ["@/modules/*/*"],
+  message: "Import a module through its index.ts, never from its internals.",
+};
+const forbidLucideDirect = {
+  group: ["lucide-react"],
+  message: "Import icons from @/ui/icons so the icon set stays swappable.",
+};
+const forbidModulesFromUiShared = {
+  group: ["@/modules/*"],
+  message: "ui/ and shared/ must not import from modules/.",
+};
+// `no-restricted-imports` patterns are gitignore-style globs, not regex: a
+// bare `*` never crosses a `/`, and `**` will not cross into a segment that
+// itself starts with `.` (so "../**" alone does not catch "../../foo"). So
+// each realistic upward-escape depth is spelled out literally, with `**`
+// only covering the non-dotted remainder after it.
+const forbidUpwardRelative = {
+  group: ["../**", "../../**", "../../../**", "../../../../**"],
+  message: "Import across directories through the @/ alias so the module and layer boundary rules can see it.",
+};
+
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
@@ -17,16 +44,19 @@ const eslintConfig = defineConfig([
     files: ["src/**/*.{ts,tsx}"],
     rules: {
       "no-restricted-imports": ["error", {
-        patterns: [
-          {
-            group: ["@/modules/*/*"],
-            message: "Import a module through its index.ts, never from its internals.",
-          },
-          {
-            group: ["lucide-react"],
-            message: "Import icons from @/ui/icons so the icon set stays swappable.",
-          },
-        ],
+        patterns: [forbidModuleInternals, forbidLucideDirect],
+      }],
+    },
+  },
+  {
+    // Every cross-directory import inside modules/, ui/ and shared/ must go
+    // through its @/ alias, so the rules above can actually see it — a
+    // relative `../` escape is invisible to a rule that only matches
+    // `@/modules/*` specifiers.
+    files: ["src/modules/**/*.{ts,tsx}"],
+    rules: {
+      "no-restricted-imports": ["error", {
+        patterns: [forbidModuleInternals, forbidLucideDirect, forbidUpwardRelative],
       }],
     },
   },
@@ -35,7 +65,7 @@ const eslintConfig = defineConfig([
     files: ["src/ui/**/*.{ts,tsx}", "src/shared/**/*.{ts,tsx}"],
     rules: {
       "no-restricted-imports": ["error", {
-        patterns: [{ group: ["@/modules/*"], message: "ui/ and shared/ must not import from modules/." }],
+        patterns: [forbidModuleInternals, forbidLucideDirect, forbidModulesFromUiShared, forbidUpwardRelative],
       }],
     },
   },

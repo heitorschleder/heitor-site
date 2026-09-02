@@ -1,4 +1,4 @@
-import { REPO_OVERRIDES } from '../../../content/repos.overrides'
+import { REPO_OVERRIDES } from '@content/repos.overrides'
 import { GITHUB_LOGIN } from '@/shared/site.config'
 import type { LoadResult, Repository } from './repos.types'
 

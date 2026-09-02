@@ -2,7 +2,8 @@
 
 Canonical personal site of Heitor Schleder — portfolio and blog, in English.
 
-Next.js 16 · React 19 · TypeScript · Tailwind v4 · shadcn/ui · Velite.
+Next.js 16 · React 19 · TypeScript · Tailwind v4 · Velite. The shadcn CLI is
+configured (`components.json`) but no primitives are generated or in use yet.
 
 The design is written down in
 [`docs/superpowers/specs/2026-09-01-portfolio-blog-design.md`](docs/superpowers/specs/2026-09-01-portfolio-blog-design.md).
