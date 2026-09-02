@@ -1,10 +1,11 @@
 import { posts as allPosts } from '#content'
-import { countBy, type FilterItem } from '@/shared/counts'
 import type { PostSummary } from './PostList'
 
 export { PostList, formatDate, type PostSummary } from './PostList'
 export { PostArticle, type ArticleHead } from './PostArticle'
 export { MDXContent } from './MDXContent'
+export { PostBrowser } from './PostBrowser'
+export { tagCounts } from './tag-counts'
 
 /** Published posts, newest first. Drafts never reach a production build. */
 export function sortedPosts(): PostSummary[] {
@@ -36,8 +37,4 @@ export function findPublishedPost<T extends { slug: string; draft: boolean }>(
   slug: string,
 ): T | undefined {
   return posts.find((post) => post.slug === slug && !post.draft)
-}
-
-export function tagCounts(posts: PostSummary[]): FilterItem[] {
-  return countBy(posts, (post) => post.tags)
 }

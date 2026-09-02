@@ -20,7 +20,16 @@ export function formatDate(iso: string): string {
   })
 }
 
-export function PostList({ posts }: { posts: PostSummary[] }) {
+export function PostList({
+  posts,
+  isHidden,
+}: {
+  posts: PostSummary[]
+  /** Per-post visibility. Non-matching entries stay in the tree carrying
+      `hidden`, so the prerendered HTML holds every post even when a tag
+      filter is applied on the client. */
+  isHidden?: (post: PostSummary) => boolean
+}) {
   if (posts.length === 0) {
     return (
       <p className="px-3 py-6 text-[14px] text-[var(--color-mute)]">
@@ -34,6 +43,7 @@ export function PostList({ posts }: { posts: PostSummary[] }) {
       {posts.map((post) => (
         <li
           key={post.slug}
+          hidden={isHidden?.(post)}
           className="grid grid-cols-1 gap-[6px] border-b border-[var(--color-rule)] px-3 py-[13px] last:border-b-0 @min-[520px]/shell:grid-cols-[86px_minmax(0,1fr)] @min-[520px]/shell:gap-[14px]"
         >
           <time

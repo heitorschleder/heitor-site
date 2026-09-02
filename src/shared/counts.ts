@@ -1,9 +1,21 @@
 /**
- * One item per label, plus how many active. Also what `FilterStrip` renders
- * a list of — `active` is the one field `countBy` never sets, since deciding
- * which filter is selected is a UI concern, not a counting one.
+ * One item per label, plus how many carry it. Which facet is *selected* is not
+ * here on purpose: that is a UI concern the browsing component owns, and
+ * putting it on the counted item is what let the strip render a hardcoded
+ * `active: true` on "All" and look like a control while being a label.
  */
-export type FilterItem = { label: string; count: number; active?: boolean }
+export type FilterItem = { label: string; count: number }
+
+/** The facet that applies no filter. One spelling, so no caller invents another. */
+export const ALL_FILTER = 'All'
+
+/**
+ * Prepends the "no filter" facet, whose count is the whole collection rather
+ * than any one label's tally.
+ */
+export function withAllFacet(total: number, facets: FilterItem[]): FilterItem[] {
+  return [{ label: ALL_FILTER, count: total }, ...facets]
+}
 
 /**
  * `Map` accumulate, then sort by count descending, ties broken alphabetically

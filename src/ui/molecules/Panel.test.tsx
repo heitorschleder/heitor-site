@@ -1,5 +1,6 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { Panel } from './Panel'
 import { FilterStrip } from './FilterStrip'
 import { Cpu } from '@/ui/icons'
@@ -52,18 +53,40 @@ describe('Panel', () => {
 })
 
 describe('FilterStrip', () => {
+  const items = [
+    { label: 'All', count: 22 },
+    { label: 'Vue', count: 10 },
+  ]
+
   it('shows a label and count per item', () => {
-    render(
-      <FilterStrip
-        items={[
-          { label: 'All', count: 22, active: true },
-          { label: 'Vue', count: 10 },
-        ]}
-      />,
-    )
+    render(<FilterStrip items={items} active="All" onSelect={() => {}} label="Filter by language" />)
     expect(screen.getByText('All')).toBeInTheDocument()
     expect(screen.getByText('22')).toBeInTheDocument()
     expect(screen.getByText('Vue')).toBeInTheDocument()
     expect(screen.getByText('10')).toBeInTheDocument()
+  })
+
+  it('renders each facet as a button, so it can be reached by keyboard', () => {
+    render(<FilterStrip items={items} active="All" onSelect={() => {}} label="Filter by language" />)
+    expect(screen.getAllByRole('button')).toHaveLength(2)
+  })
+
+  it('marks only the active facet as pressed', () => {
+    render(<FilterStrip items={items} active="Vue" onSelect={() => {}} label="Filter by language" />)
+    expect(screen.getByRole('button', { name: /Vue/ })).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByRole('button', { name: /All/ })).toHaveAttribute('aria-pressed', 'false')
+  })
+
+  it('reports the clicked label', async () => {
+    const user = userEvent.setup()
+    const onSelect = vi.fn()
+    render(<FilterStrip items={items} active="All" onSelect={onSelect} label="Filter by language" />)
+    await user.click(screen.getByRole('button', { name: /Vue/ }))
+    expect(onSelect).toHaveBeenCalledWith('Vue')
+  })
+
+  it('names the group for assistive tech', () => {
+    render(<FilterStrip items={items} active="All" onSelect={() => {}} label="Filter by language" />)
+    expect(screen.getByRole('group', { name: 'Filter by language' })).toBeInTheDocument()
   })
 })
