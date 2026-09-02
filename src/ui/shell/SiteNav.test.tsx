@@ -29,7 +29,14 @@ describe('SiteNav', () => {
     )
     expect(screen.getByRole('link', { name: /linkedin/i })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /email/i })).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: /rss/i })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /download cv/i })).toBeInTheDocument()
+  })
+
+  it('serves the CV as a download rather than opening the PDF viewer', () => {
+    render(<SiteNav pathname="/" />)
+    const cv = screen.getByRole('link', { name: /download cv/i })
+    expect(cv).toHaveAttribute('href', '/heitor-schleder-cv.pdf')
+    expect(cv).toHaveAttribute('download')
   })
 
   // Nothing renders this text today, so this guard cannot fail from a

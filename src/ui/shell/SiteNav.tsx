@@ -1,7 +1,6 @@
 import Link from 'next/link'
 import { cn } from '@/shared/cn'
-import { site } from '@/shared/site.config'
-import { BrandGithub, BrandLinkedin, Mail, Rss } from '@/ui/icons'
+import { NAV_LINKS } from './nav-links'
 import { ThemeToggle } from './ThemeToggle'
 
 const ROUTES = [
@@ -10,12 +9,6 @@ const ROUTES = [
   { href: '/about', label: 'About' },
 ] as const
 
-const SOCIAL = [
-  { key: 'GitHub', icon: BrandGithub, ...site.social.github },
-  { key: 'LinkedIn', icon: BrandLinkedin, ...site.social.linkedin },
-  { key: 'Email', icon: Mail, ...site.social.email },
-  { key: 'RSS', icon: Rss, ...site.social.rss },
-]
 
 function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`)
@@ -69,10 +62,11 @@ export function SiteNav({ pathname }: { pathname: string }) {
       </ul>
 
       <div className="order-2 flex items-center gap-px @min-[560px]/shell:order-3">
-        {SOCIAL.map(({ key, icon: Icon, href }) => (
+        {NAV_LINKS.map(({ key, icon: Icon, href, download }) => (
           <a
             key={key}
             href={href}
+            download={download ? '' : undefined}
             aria-label={key}
             className="flex size-11 items-center justify-center border border-transparent text-[var(--color-mute)] transition-colors hover:border-[var(--color-rule)] hover:text-[var(--color-acc)] @min-[560px]/shell:size-[30px]"
           >

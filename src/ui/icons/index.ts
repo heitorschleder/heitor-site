@@ -5,12 +5,12 @@ export {
   Briefcase,
   ChevronDown,
   Cpu,
+  Download,
   GitBranch,
   GraduationCap,
   Mail,
   MapPin,
   Moon,
-  Rss,
   Sun,
   type LucideIcon,
 } from 'lucide-react'
