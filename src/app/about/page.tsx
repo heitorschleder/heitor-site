@@ -4,7 +4,8 @@ import { PageHeader } from '@/ui/molecules/PageHeader'
 
 export const metadata: Metadata = {
   title: 'About',
-  description: 'Intern-turned-tech-lead with a Data Science degree. Full stack developer across React, Flutter, Java, cloud infrastructure, and AI.',
+  description:
+    'How curiosity, a fleet product used on bad 4G, and leading four developers shaped how I write code — plus the computer vision work I am proudest of.',
 }
 
 export default function AboutPage() {
