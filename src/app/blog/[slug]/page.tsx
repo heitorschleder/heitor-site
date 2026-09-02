@@ -32,7 +32,6 @@ export default async function PostPage({ params }: Params) {
         date: post.date,
         summary: post.summary,
         tags: post.tags,
-        readingTime: post.reading.readingTime,
       }}
     >
       <MDXContent code={post.content} />

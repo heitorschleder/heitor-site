@@ -18,7 +18,6 @@ export function sortedPosts(): PostSummary[] {
       date: post.date,
       summary: post.summary,
       tags: post.tags,
-      readingTime: post.reading.readingTime,
     }))
 }
 

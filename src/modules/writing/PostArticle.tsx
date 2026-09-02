@@ -1,6 +1,6 @@
 import type { PostSummary } from './PostList'
 
-export type ArticleHead = Pick<PostSummary, 'title' | 'date' | 'summary' | 'tags' | 'readingTime'>
+export type ArticleHead = Pick<PostSummary, 'title' | 'date' | 'summary' | 'tags'>
 
 export function PostArticle({
   post,
@@ -22,7 +22,6 @@ export function PostArticle({
         <p className="mb-3 flex flex-wrap items-center gap-x-[14px] gap-y-2 font-mono text-[10px] uppercase tracking-[0.12em] text-[var(--color-mute)]">
           <span className="text-[var(--color-acc)]">{post.tags[0]}</span>
           <time dateTime={post.date}>{printed}</time>
-          <span>{post.readingTime} min read</span>
           <span>EN</span>
         </p>
         <h1 className="mb-3 max-w-[20ch] text-balance font-display text-[clamp(26px,4.6vw,42px)] font-bold uppercase leading-[0.98] tracking-[0.01em] text-[var(--color-ink)]">

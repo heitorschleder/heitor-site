@@ -9,7 +9,6 @@ const post = {
   date: '2026-08-24',
   summary: 'Six panels, six upstream services, one rule.',
   tags: ['Architecture', 'TypeScript'],
-  readingTime: 7,
 }
 
 describe('PostArticle', () => {

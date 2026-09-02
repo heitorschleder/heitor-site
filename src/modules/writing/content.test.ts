@@ -23,10 +23,6 @@ describe('post collection', () => {
     }
   })
 
-  it('computes reading time', () => {
-    expect(posts[0].reading.readingTime).toBeGreaterThan(0)
-  })
-
   it('keeps every slug unique', () => {
     expect(new Set(posts.map((p) => p.slug)).size).toBe(posts.length)
   })

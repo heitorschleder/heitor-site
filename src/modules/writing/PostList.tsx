@@ -9,7 +9,6 @@ export type PostSummary = {
   date: string
   summary: string
   tags: string[]
-  readingTime: number
 }
 
 export function formatDate(iso: string): string {
@@ -58,9 +57,6 @@ export function PostList({ posts }: { posts: PostSummary[] }) {
                   {tag}
                 </Chip>
               ))}
-              <span className="font-mono text-[9.5px] uppercase tracking-[0.09em] text-[var(--color-mute)]">
-                {post.readingTime} min
-              </span>
             </div>
           </div>
         </li>

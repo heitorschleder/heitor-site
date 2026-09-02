@@ -10,7 +10,6 @@ const posts: PostSummary[] = [
     date: '2026-08-24',
     summary: 'Newer summary.',
     tags: ['Architecture'],
-    readingTime: 7,
   },
   {
     slug: 'older',
@@ -19,7 +18,6 @@ const posts: PostSummary[] = [
     date: '2026-08-02',
     summary: 'Older summary.',
     tags: ['Frontend'],
-    readingTime: 6,
   },
 ]
 
@@ -39,10 +37,9 @@ describe('PostList', () => {
     expect(time).toHaveAttribute('dateTime', '2026-08-24')
   })
 
-  it('shows tags and reading time', () => {
+  it('shows tags', () => {
     render(<PostList posts={posts} />)
     expect(screen.getByText('Architecture')).toBeInTheDocument()
-    expect(screen.getByText('7 min')).toBeInTheDocument()
   })
 
   it('says so plainly when there is nothing to read', () => {

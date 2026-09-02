@@ -14,7 +14,6 @@ const posts = defineCollection({
       draft: s.boolean().default(false),
       slug: s.path(),
       content: s.mdx(),
-      reading: s.metadata(),
     })
     .transform((data) => {
       // s.path() yields "posts/2026-08-24-title"; the route wants the bare slug
