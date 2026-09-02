@@ -1,6 +1,7 @@
 // Every icon the app uses passes through here, so swapping a set later is one file.
 export {
   ArrowUpRight,
+  BookOpen,
   Briefcase,
   ChevronDown,
   Cpu,
