@@ -1,0 +1,29 @@
+---
+title: One route parameter and every patient record
+date: 2026-08-16
+summary: A path param that sanitized neither slashes nor `../` was enough to browse every record on the server. What got me was recognising the missing validation as one I write every day.
+tags:
+  - Security
+  - Events
+---
+
+A route parameter that accepted `/` was enough to reach every patient record on
+the server.
+
+That happened live at CodeCon, in Curitiba, on August 14th and 15th, during a
+Capture the Flag run by YuriRDev. The target was an appointment scheduling system.
+
+The path was simpler than I expected. The path param sanitized neither slashes
+nor `../`, so the application started reading whatever the attacker typed as a
+directory separator. The intended routing broke, and what was sitting on the
+server became browsable — all the records, not one.
+
+What got me wasn't the technique. It was realizing that the missing validation
+is the same kind I write every day without thinking twice: take the id from the
+route, use the id. I left with a question I still can't answer — which of my
+routes accept a `/` nobody planned for.
+
+I've always studied development best practices, the do-it-right side. I never
+studied the inverse: how someone breaks that on purpose. Those are two different
+disciplines, and it took watching the CTF to see how far apart they are. Next
+step is being able to reproduce what he did, not just having watched it.
