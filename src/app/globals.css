@@ -190,6 +190,19 @@ details[open]::details-content {
     height: 2px;
     background: var(--color-acc);
   }
+  /* Subordinate to h2 by family and size rather than by a second accent mark:
+     the dash belongs to the section, and repeating it one level down would
+     flatten the two into the same rank. Mono here is the same console voice
+     the timestamps and meta lines use. */
+  .prose-console h3 {
+    margin: 24px 0 10px;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+    color: var(--color-ink);
+  }
   .prose-console ul {
     margin: 0 0 17px;
     padding: 0;

@@ -1,0 +1,160 @@
+---
+title: Virtualizing a 250,000-row table
+date: 2026-09-09
+summary: The screen took 10 seconds to open and froze on scroll — 250,000 rows, one request, every row in the DOM. Virtualization fixed that, but the interesting part was finding the whole table rests on two measurements.
+tags:
+  - Frontend
+  - Performance
+  - React
+---
+
+The screen took 10 seconds to open and froze as soon as you scrolled. The client
+was about to ask for a refund and cancel the contract — and they were right.
+Software that can't show the data it stores delivers nothing.
+
+## Context
+
+This client had around 250,000 tires registered. Each tire is one table row, and
+each row carries dozens of fields: the tire's own data plus links to reports. A
+large dataset and a wide table at the same time.
+
+The screen did the most direct thing possible: one request, every tire in the
+company, render. That works on a test database, works reasonably well for a
+small client, and dies on exactly the client who needs the screen most. Two
+hundred and fifty thousand rows with dozens of cells each turn into millions of
+DOM nodes. The browser doesn't freeze out of spite: it has to compute layout,
+paint and composite all of that, and there is only one main thread.
+
+## What we did
+
+Before writing any code, I went looking for what exists to handle large lists on
+the front end. Three paths show up, and two of them end in the same place.
+
+**Infinite scroll.** Ruled out. It fixes the initial load and fixes nothing
+after that: elements keep piling up in the DOM as the user scrolls down. On a
+250k dataset, infinite scroll is the same problem with a delay — the user
+arrives at the freeze instead of starting there.
+
+**Classic pagination.** Also not the answer as a *rendering* strategy. It bounds
+the render, but at the cost of turning a table into a walk through thousands of
+pages. The irony is that pagination came back later — not as a display strategy,
+but as a fetching one. I'll get there.
+
+**Virtualization.** On the front end, it's the most performant way to render a
+list: you only render what the user is actually looking at.
+
+### How virtualization works
+
+The idea is to fool the browser on purpose. You have a container with a fixed
+height and `overflow`. Inside it, an element whose height is the height the
+table *would* have if every row existed. And inside that, only the visible rows,
+positioned at the right coordinate.
+
+Two measurements hold the whole thing up:
+
+**Row height** is the conversion factor between pixels and index. It's what
+turns `scrollTop` into "which row is at the top right now" — `scrollTop /
+rowHeight` — and viewport height into "how many rows fit". If that measurement
+is off by 2px, at index 200,000 the accumulated error is 400,000px: the row you
+render is not the row that belongs there.
+
+**Total height** (`count * rowHeight`) is what sizes the scrollbar. It's the only
+thing telling the browser the list is big. Without it, the scrollbar is the size
+of the visible window and the user has nowhere to scroll.
+
+With TanStack Virtual, this is almost literal:
+
+```tsx
+const rowVirtualizer = useVirtualizer({
+  count: rows.length,                        // 250,000
+  getScrollElement: () => scrollRef.current,
+  estimateSize: () => rowHeight,             // the px ↔ index conversion
+  overscan: 10,                              // extra rows outside the viewport
+})
+
+// total height is what sizes the scrollbar
+<div style={{ height: rowVirtualizer.getTotalSize(), position: 'relative' }}>
+  {rowVirtualizer.getVirtualItems().map((item) => (
+    <Row
+      key={rows[item.index].id}
+      data={rows[item.index]}
+      style={{
+        position: 'absolute',
+        transform: `translateY(${item.start}px)`,
+        height: item.size,
+      }}
+    />
+  ))}
+</div>
+```
+
+The detail that matters: `getVirtualItems()` returns 40 to 50 rows, never
+250,000 — and exactly how many depends on the display mode, because taller rows
+mean fewer rows fitting in the viewport. As the user scrolls, that array
+**swaps its contents**. Rows leaving the screen are unmounted from the DOM, new
+ones are mounted. Nothing accumulates.
+
+This is where virtualization parts ways with infinite scroll, and it's the part
+that confuses people who have never implemented it: the user can travel from
+index 0 to 249,999 and back, and at any given moment the DOM holds the same 40
+to 50 rows. The node count is constant and independent of dataset size. That's
+why the screen doesn't freeze with 250,000 tires — and wouldn't freeze with a
+million.
+
+### Picking the library
+
+I built the proof of concept with `react-window`, which let me understand the
+mechanism before depending on an abstraction. But the project already used
+TanStack, so I shipped it on TanStack Virtual. It isn't a question of which one
+is better: introducing a second list library to solve a problem the existing
+stack already solves is debt somebody pays later.
+
+### Variable heights
+
+At first we locked a fixed row height. Later we opened display modes —
+`regular`, `comfort`, `expansive` — and let the user choose.
+
+That was cheaper than it sounds, precisely because the entire coordinate system
+derives from a single number. Switching modes means switching `rowHeight`: total
+height recomputes, index mapping recomputes, the virtualizer adapts.
+
+### The pagination that came back
+
+After virtualization, the DOM was solved and the transport wasn't. We were still
+pulling 250,000 records in a single request. So I implemented pagination on the
+back end, with the front end fetching the next range as the scroll approaches
+the end of what's already loaded.
+
+## The hardest part
+
+It wasn't virtualization itself — it was the seam between virtualization and
+pagination.
+
+We added a loading row at the end of the list, shown when the user scrolls to
+the bottom and triggers the next-page request. In rare, hard-to-reproduce cases,
+that row would flicker: appear, disappear, appear again with nothing new, and
+the loop would repeat.
+
+The cause was an inconsistency between the virtualizer and the loading state.
+When there was no more data to fetch, the loading row still entered the
+virtualized window and forced a request for a page that didn't exist. The empty
+response removed the row, the list shrank, the virtualized window recalculated,
+the row entered again — and the cycle restarted.
+
+It's not a virtualization bug and it's not a pagination bug: it's a bug of the
+two disagreeing about how many rows the list has. The fix was making the loading
+row's existence depend on there actually being a next page, instead of it being
+a permanent item at the end of the virtualized list.
+
+## Result
+
+A screen that used to open after 10 seconds of loading now opens instantly.
+Scrolling, which used to cause lag and could freeze the page outright, now goes
+up and down as much as the user wants without degrading.
+
+And the client stayed.
+
+The most interesting technical part of this work wasn't rendering less. It was
+realizing the entire table rests on two measurements — row height and total
+height — and everything else is arithmetic on top of them. It's also why the
+bugs show up in the seams with other features, not in the scroll math.
