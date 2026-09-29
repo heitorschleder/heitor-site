@@ -1,7 +1,7 @@
 ---
 title: One route parameter and every patient record
 date: 2026-08-16
-summary: A path param that sanitized neither slashes nor `../` was enough to browse every record on the server. What got me was recognising the missing validation as one I write every day.
+summary: A path param that sanitized neither slashes nor `../` was enough to browse every record on the server. How the CTF actually got there — trial and error through the usual suspects — and what I found auditing my own routes.
 tags:
   - Security
   - Events
@@ -11,19 +11,57 @@ A route parameter that accepted `/` was enough to reach every patient record on
 the server.
 
 That happened live at CodeCon, in Curitiba, on August 14th and 15th, during a
-Capture the Flag run by YuriRDev. The target was an appointment scheduling system.
+Capture the Flag run by YuriRDev. The target was an appointment scheduling
+system.
+
+## It didn't start with the path traversal
+
+What I didn't expect was how much of the CTF was failing. Before finding
+anything, he went through a checklist of the usual suspects, one at a time:
+
+- **Environment variables.** Was the app leaking its env anywhere reachable
+  from the outside?
+- **Stored credentials.** Were the user's credentials sitting somewhere they
+  shouldn't be?
+- **Token expiration.** Did the session token actually expire when it was
+  supposed to?
+
+None of those gave him anything. He kept going, trial and error, until one did.
+
+That was the best part of watching it live. A hack in a talk slide is a clean
+line from vulnerability to exploit. A hack in real time is someone trying the
+next thing, and the next, until something gives. It's execution to exhaustion,
+not a flash of insight.
+
+## The flaw
 
 The path was simpler than I expected. The path param sanitized neither slashes
 nor `../`, so the application started reading whatever the attacker typed as a
 directory separator. The intended routing broke, and what was sitting on the
 server became browsable — all the records, not one.
 
-What got me wasn't the technique. It was realizing that the missing validation
-is the same kind I write every day without thinking twice: take the id from the
-route, use the id. I left with a question I still can't answer — which of my
-routes accept a `/` nobody planned for.
+What got me wasn't the technique. It was realizing the missing validation is the
+same kind I write every day without thinking twice: take the id from the route,
+use the id.
+
+## Checking my own routes
+
+So I went back and audited the routes in the product I work on. The way we
+build it, a path traversal like that one doesn't reach our data: we validate the
+format of every route parameter, so a value carrying `/` or `../` is rejected
+before the application does anything with it.
+
+## Meeting my first teacher
+
+The other highlight was Gustavo Guanabara's talk. He was my first programming
+teacher. The talk was about his path through tech — not much technical content,
+and it didn't need any. Getting to see up close, and actually talk to, someone
+who taught me so much when I was starting out was really satisfying.
+
+## Two different disciplines
 
 I've always studied development best practices, the do-it-right side. I never
 studied the inverse: how someone breaks that on purpose. Those are two different
-disciplines, and it took watching the CTF to see how far apart they are. Next
-step is being able to reproduce what he did, not just having watched it.
+disciplines, and it took watching the CTF to see how far apart they are.
+
+Next step is being able to reproduce what he did, not just having watched it.
