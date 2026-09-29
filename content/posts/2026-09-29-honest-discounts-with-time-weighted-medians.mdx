@@ -1,0 +1,59 @@
+---
+title: "A discount you can check: time-weighted medians for price history"
+date: 2026-09-29
+summary: "Measuring discounts against observed price history, not the store's old price. Why a median over history rows is biased when rows are only written on change, and how a daily fill-forward series makes it time-weighted."
+tags:
+  - Backend
+  - Java
+  - Data
+---
+
+A "was R$2,000, now R$1,500" label tells you what the store says the price was. It doesn't tell you what the price actually was.
+
+For the deals page of Setupei, I wanted the discount measured against the price history we observed ourselves. The obvious way to do that — take the median of the price history — turned out to be wrong.
+
+## Setupei
+
+Setupei is a PC price comparison and builder for the Brazilian market that I'm building with Giovani Valgas. It aggregates hardware prices from seven stores, lets you assemble a compatible build, and points you to the best price.
+
+Giovani built most of the data side: the crawlers, the infrastructure and most of the backend — Java 21 and Spring Boot, with the crawlers publishing through RabbitMQ. I worked mostly on the Next.js front end: the first prototype, the PC builder, build comparison, favorite stores. And the deals page, front to back, which is what this post is about.
+
+## The discount base
+
+The deals page lists real price drops. So instead of calculating the discount against the old price the store displays, it's calculated against the **median of a price window** — 30, 90 or 180 days of prices we saw — and the page says which base it's using.
+
+## Why a plain median is wrong
+
+Our ingestion writes a row to the price history only when something changes: price, availability or stock.
+
+That's efficient, and it breaks a naive median. A price that sat at R$1,759 for 80 days produces **one** row. A price that bounced around for 3 days produces **twenty**. A median over the rows gives those 3 noisy days twenty times the weight of the 80 quiet ones.
+
+The fix is to compute the statistics over time, not over rows. The calculator rebuilds a **daily series**:
+
+1. A day's price is the lowest price among the offers available that day, using fill-forward — for each offer, its last event on or before that day.
+2. The series is seeded with the last event *before* the window starts. Otherwise a price set 200 days ago and never changed would vanish from a 90-day window.
+3. Days when no offer was available **don't enter the series**. They don't become zero, and they aren't interpolated. A product that was out of stock for 60 days and came back cheaper gets a median calculated only over the days you could actually buy it.
+
+The median of that series is time-weighted by construction. The number of days in it, `sample_days`, is kept too: a short series isn't a deal, and that's what lets the page say so.
+
+The drop is stored with its sign — `(median − best price) / median` — so a price *above* the median shows up as negative instead of being hidden. The page can be honest about that too.
+
+## Decisions along the way
+
+**Persisted, not computed on read.** Ranking "who dropped the most" needs the statistics for every product, not just the ones on the current page. Computing on read would force restricting the universe with a pre-filter first — which produces the wrong order disguised as an optimization. So the windows live in their own table, and the drop percentage is stored next to the best price, so the ranking is indexable and the two numbers never disagree.
+
+**Calculated in Java, not SQL.** The time-weighted median is the part that has to be right. As a pure function in Java, it's tested with plain unit tests. The SQL alternative — `generate_series` plus gaps-and-islands — would have introduced the first native query in a worker that was entirely JPQL, and it would only be testable through integration tests.
+
+**One source for every discount.** The deals page and the product page read the same statistics. If the discount on the listing and on the product page ever diverged, the whole point of an honest number would be gone.
+
+**Recalculated twice.** Incrementally, in the ingestion flow that already existed. And nightly, because the window slides on its own: a product whose price never changes never receives an event, but its 90-day window still moves every day.
+
+## The midnight bug
+
+One bug worth mentioning: days had to be anchored in UTC. Without that, events near midnight could land on the wrong day, and the daily series drifted at day boundaries. Small bug, but in a series built day by day, a day in the wrong place is a wrong median.
+
+## Result
+
+The deals page ranks products by real drops against their own history, the product card shows the minimum and the median of the 90-day window, and the page header states what the discount is measured against.
+
+The most important decision wasn't the median. It was noticing that "one row per change" and "one vote per row" don't go together.

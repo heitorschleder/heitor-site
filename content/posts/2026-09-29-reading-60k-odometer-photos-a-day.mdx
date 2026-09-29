@@ -1,0 +1,71 @@
+---
+title: "Reading 60,000 odometer photos a day for a tenth of the cost"
+date: 2026-09-29
+summary: "An LLM pipeline reading 60,000+ field photos a day went from over R$2,500 to under R$250 a month at 99% accuracy — through the prompt, the crop and the output, not just a cheaper model. Plus the one-line cut that took decimal odometers to 0%."
+tags:
+  - AI
+  - LLM
+  - Cost
+---
+
+The first version worked, and it cost over R$2,500 a month. The current one reads the same 60,000+ images a day with 99% accuracy for under R$250.
+
+Nothing about the volume changed. What changed was everything around the model.
+
+## What LIA does
+
+LIA — short for *Leitura com Inteligência Artificial*, AI reading — is a feature I built from scratch at Prolog App, a fleet management platform. Photos are taken in the field, and LIA reads what's in them: the number on an odometer, or whether a vehicle part really is broken, among other checks.
+
+Odometers are the case that shaped the whole thing, so that's the one I'll follow here.
+
+## The expensive first version
+
+The first version used expensive LLMs with weak prompts. It produced a budget of more than R$2,500 per month for 60,000+ images a day.
+
+It also wasn't accurate. We tested it the simplest way possible: take a photo of a real odometer — often dirty, often out of focus, because that's what photos taken in the field look like — and check the answer by hand. Accuracy was very low, and sometimes the model simply couldn't read the image at all.
+
+Some models did work very well. They were also far too expensive for the business. A reading that costs more than the problem it solves isn't a solution, so those were out.
+
+## Three changes
+
+### 1. A prompt that knows about decimals
+
+The first fix was the prompt itself. It had to recognize odometer numbers without ignoring odometers and hubodometers that show a decimal digit.
+
+That detail matters more than it looks. A hubodometer is the distance counter mounted on the wheel hub of trucks and trailers, and some of them show a decimal. If the model drops the decimal point, or reads the decimal digit as part of the integer, the mileage lands one order of magnitude off. The prompt tells the model explicitly not to do that.
+
+### 2. An image cut to the right size
+
+LLMs charge by token, and images turn into tokens. So the second change was resizing and cropping each image to the size that costs the fewest tokens possible while still keeping the odometer readable.
+
+Every pixel you don't send is money you don't spend, 60,000 times a day.
+
+### 3. An output with nothing but the number
+
+The third change was the output. Instead of letting the model describe what it saw, I reduced the response to a very small object carrying only the numbers the backend needs to read.
+
+Fewer output tokens is cheaper. It's also more reliable: the backend parses a number, not a sentence.
+
+## Finding the model
+
+With the prompt, the input and the output tightened, the model no longer had to be the smartest one available. I started with Gemini Flash and then went through several other models on OpenRouter, checking each against the same real photos, until I landed on Qwen Flash.
+
+A cheaper, weaker model does the job because the harness around it does most of the work.
+
+## The optimization that broke everything
+
+This is the part I'd do differently.
+
+At one point I was already at 99% accuracy and started cutting the prompt to save more tokens. One of the lines I removed was the instruction telling the model not to ignore the decimal point on decimal odometers. It looked like the kind of detail the model would handle anyway.
+
+It didn't. Accuracy on odometers with a decimal digit went from 99% to 0%.
+
+The line went back in. The instruction that looks redundant is often the one carrying the edge case, and the only way to know is to test against real photos after every change — not just after the big ones.
+
+## Result
+
+- **Volume:** 60,000+ images per day
+- **Accuracy:** 99%, checked by hand against real field photos
+- **Cost:** from over R$2,500 to under R$250 per month — a 90% reduction
+
+The cheaper model is what cut the bill. The prompt, the crop and the output are what made a cheaper model possible.

@@ -1,0 +1,59 @@
+---
+title: "Building my own JARVIS with no paid APIs"
+date: 2026-09-29
+summary: "A side project that started with a hand-tracking library: gesture and wake-word activation, Portuguese speech with English tech words, a local 3B model picking intents, and guardrails before it touches git. No paid APIs."
+tags:
+  - AI
+  - Python
+  - Side project
+---
+
+It started because I wanted to try a hand-tracking library. It turned into an assistant that wakes up when I pull my hands apart, understands me in Portuguese with English tech words mixed in, and opens pull requests for me — without a single paid API.
+
+## How it started
+
+JARVIS is a side project. I built it to study local LLMs, to see how far I could go coding with AI, and to play with Python libraries. Mostly, I had fun building it.
+
+At first I only wanted to install MediaPipe and test hand recognition. Once that worked, I started triggering actions with gestures. Then I thought: if something is watching and listening to me, it should have a personality. That's how JARVIS was born — and yes, it's heavily inspired by Iron Man's.
+
+One rule shaped every decision after that: **it can't cost me anything.** No paid APIs, no model training. Everything runs on my own machine.
+
+## Waking up with a gesture
+
+The activation is two open hands, close together, moving apart horizontally.
+
+OpenCV reads the webcam and MediaPipe tracks both hands. From there it's a small state machine over the normalized horizontal distance between them: hands open and close together arm it, the distance growing for several frames in a row means it's activating, and crossing a threshold fires the activation event. No model was trained for this — it's geometry on top of the landmarks MediaPipe already gives you.
+
+Later I added a voice trigger alongside the gesture: "hey jarvis", using a pre-trained openWakeWord model.
+
+## Understanding a Brazilian developer
+
+I speak Portuguese. But I'm a software developer, so half my sentences have English in them: branch, pull request, merge, deploy, hotfix.
+
+Transcription runs locally with Whisper — large-v3-turbo on the Mac's GPU through mlx-whisper, falling back to faster-whisper where that isn't available — set to Portuguese. And Whisper in Portuguese tortures English words: "branch" comes out as "brenchi", "pull request" as "pulô requeste".
+
+Two things fix that. First, a glossary of tech terms passed to the decoder as a prompt, so it expects those words. Second, a table of phonetic aliases applied after transcription, for whatever the glossary doesn't catch — "brenchi" becomes "branch" before anything else reads it.
+
+## A small local model deciding what to do
+
+Once the sentence is transcribed, a local LLM — `qwen2.5:3b`, running on Ollama — interprets it. It picks the intent and its arguments, executes directly, and asks a question only when it didn't understand.
+
+The important detail is what the model *doesn't* do: it never writes commands. It only chooses from the intents that exist and fills in their arguments. The replies are spoken back with Piper, a local text-to-speech engine, and a small HUD in React shows what JARVIS is hearing and doing.
+
+## Letting a voice assistant touch git
+
+The part that became most useful for my day as a developer is the dev workflow: starting work on a branch, checking a PR's status, opening a pull request — by voice.
+
+That's also where it could do the most damage, so two rules sit in code, not in the prompt.
+
+**It never deletes anything.** A guardrail inspects the exact argument list that would be executed — there's never a shell in between — and blocks things like `rm`, `sudo`, `git reset --hard`, `git push --force` and `branch -D`, even if I ask for them.
+
+**Anything other people will see needs a spoken confirmation.** Before opening a PR, JARVIS says one line — which PR, which branch, which target — and waits for a short, unambiguous yes. "Ok, go ahead" confirms. "Ok, open another PR" doesn't. And what gets confirmed is exactly what runs: the details it had to work out to say that line are pinned to the command, so if I switch windows between the summary and the "yes", it doesn't quietly pick up something else.
+
+Anything that only touches my own machine runs without asking. The confirmation is for what leaves it.
+
+## Where it is now
+
+Today JARVIS wakes up by gesture or by voice, understands mixed Portuguese and English, runs dev commands with a guardrail and spoken confirmation, and also reads my calendar and the weather. All of it local, all of it free.
+
+The next step is to keep building it until it helps even more with my day as a developer.

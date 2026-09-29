@@ -1,0 +1,75 @@
+---
+title: "An OCR that knows what a license plate looks like"
+date: 2026-09-29
+summary: "On-device OCR confuses 0 with O and 1 with I. A license plate has a fixed format, so a regex plus positional logic makes those mistakes impossible — offline, at zero cost, for Brazilian, Paraguayan, US and South African plates."
+tags:
+  - Mobile
+  - Flutter
+  - OCR
+---
+
+OCR reads characters. It doesn't know what they're supposed to be. To a text recognizer, `0` and `O` are almost the same shape, and so are `1` and `I`.
+
+A license plate isn't free text, though. It has a format, and the format says exactly which positions are letters and which are numbers. That's what made plate recognition in our app accurate without any AI in the loop.
+
+## The problem
+
+At Prolog App, a fleet management platform, many processes start from a vehicle. To start one, users had to open several tabs and type the plate by hand — in the field, often on a phone, often getting a character wrong and having to start again.
+
+The goal was to replace that with the camera: point the phone at the plate and have the app fill it in.
+
+## Why not AI
+
+Our first idea was to use AI for the reading. We dropped it for two reasons.
+
+The first was cost. The second mattered more: an AI call means depending on an internet connection, and the people using this feature are in the field, where connection isn't guaranteed. The reading had to work offline, and it had to cost nothing per use.
+
+So the recognition runs on the device with Google ML Kit's text recognition, inside the Flutter app. No LLM, no paid API, no network call.
+
+## What ML Kit gets wrong
+
+On-device OCR is fast and good, but it reads shapes. On a plate it would regularly return `1` where there was an `I`, `0` where there was an `O`, and the other way around. On free text that's a small error. On a plate, it's the wrong vehicle.
+
+## Making the format do the work
+
+The Mercosur plate format used in Brazil is fixed: **letter, letter, letter, number, letter, number, number** — `ABC1D23`.
+
+That means a position that must be a letter can never hold a `0` or a `1`, and a position that must be a number can never hold an `O` or an `I`. So instead of trusting the raw OCR output, I combine a regex for each format with positional logic: every character is checked against what its position allows, and the ambiguous ones are coerced to the only valid reading.
+
+A simplified version of the idea, for the Mercosur format:
+
+```dart
+// Mercosur: letter, letter, letter, number, letter, number, number
+const pattern = 'LLLNLNN';
+const toLetter = {'0': 'O', '1': 'I'};
+const toNumber = {'O': '0', 'I': '1'};
+
+String? readMercosur(String raw) {
+  final text = raw.toUpperCase().replaceAll(RegExp(r'[^A-Z0-9]'), '');
+  if (text.length != pattern.length) return null;
+
+  final plate = StringBuffer();
+  for (var i = 0; i < text.length; i++) {
+    final c = text[i];
+    plate.write(pattern[i] == 'L' ? (toLetter[c] ?? c) : (toNumber[c] ?? c));
+  }
+
+  final result = plate.toString();
+  return RegExp(r'^[A-Z]{3}[0-9][A-Z][0-9]{2}$').hasMatch(result) ? result : null;
+}
+```
+
+In other words, the OCR proposes and the format decides. I don't ask it to be right; I make it impossible for it to be wrong in the ways it usually is.
+
+The same approach covers every format we need: the Mercosur plate, the older Brazilian format, and plates from Paraguay, the United States and South Africa. Each one is just a different pattern of letters and numbers.
+
+## Result
+
+The flow went from opening tabs and typing to three steps: tap the camera icon, point the phone at the plate, confirm it and pick the process to start.
+
+- **Cost per reading:** zero — no AI, no API, everything on the device
+- **Works offline:** yes
+- **Accuracy:** very good in the field, because the format rules out the OCR's most common mistakes
+- **Adoption:** the feature was picked up very quickly and brought a lot of positive feedback from customers
+
+The most useful part of the OCR wasn't the OCR. It was knowing, before reading anything, what the answer was allowed to look like.
